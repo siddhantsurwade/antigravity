@@ -1,0 +1,808 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --foreground: #14110F;
+  --muted: #5F5A54;
+  --border: #E7E3DC;
+  --accent: #E4572E;
+  --accent-hover: #C8441F;
+  --surface: #FFFFFF;
+  --surface-dark: #14110F;
+  --surface-elevated: #F2EFE9;
+  --grid-line: rgba(20, 17, 15, 0.055);
+  --footer-bg: #DDCFB9;
+
+  /* Day-to-Evening Sky Tokens */
+  --sky-morning: #FAF8F5;   /* current page cream */
+  --sky-midday: #FBF2E6;
+  --sky-evening: #F5DFCB;
+  --story: 0;               /* scroll progress from 0 to 1, set by script */
+
+  /* Two-step sky blend */
+  --sky-t1: calc(clamp(0, var(--story) * 2, 1) * 100%);
+  --sky-t2: calc(clamp(0, (var(--story) - 0.5) * 2, 1) * 100%);
+  --sky-step1: color-mix(in srgb, var(--sky-midday) var(--sky-t1), var(--sky-morning));
+  --sky-current: color-mix(in srgb, var(--sky-evening) var(--sky-t2), var(--sky-step1));
+
+  /* Base page background: defaults to morning cream, uses sky-current when color-mix is supported */
+  --background: var(--sky-morning);
+
+  /* Shared motion tokens */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --lift: 2px;
+  --dur: 200ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-normal: 200ms;
+
+  /* Scroll Reveal tokens */
+  --reveal-distance: 14px;
+  --reveal-dur: 650ms;
+  --reveal-stagger: 80ms;
+
+  /* Mascot alive animation tokens */
+  --z-dur: 3.6s;       /* floating "z" loop */
+  --bubble-time: 2800ms;
+  --cloud-drift: 16px;
+  --cloud-scale: 1.25;
+  --kick-deg: 7deg;
+  --kick-dur: 1.9s;
+
+  /* Pastel Mint Accent (for project tags) */
+  --mint: #7FB9A0;
+  --mint-soft: rgba(127, 185, 160, 0.14);
+  --mint-line: rgba(127, 185, 160, 0.40);
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), Inter, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-surface: var(--surface);
+  --color-surface-dark: var(--surface-dark);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-footer-bg: var(--footer-bg);
+}
+
+@supports (color: color-mix(in srgb, red, blue)) {
+  :root {
+    --background: var(--sky-current);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Clickable cursor & Keyboard accessibility focus states */
+a, button, [role="button"], input[type="submit"], input[type="button"] {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+
+/* Technical Hero Grid Background */
+.hero-grid-pattern {
+  background-size: 36px 36px;
+  background-image: 
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 30%, #000 35%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 30%, #000 35%, transparent 80%);
+}
+
+/* Subtle selection highlight */
+::selection {
+  background-color: var(--accent);
+  color: #ffffff;
+}
+
+/* --- MICRO-INTERACTIONS --- */
+
+/* 1. Primary Orange Buttons */
+.btn-primary {
+  transition: transform var(--dur) var(--ease-soft),
+              box-shadow var(--dur) var(--ease-soft),
+              background-color var(--dur) var(--ease-soft),
+              border-color var(--dur) var(--ease-soft),
+              color var(--dur) var(--ease-soft),
+              filter var(--dur) var(--ease-soft),
+              opacity var(--reveal-dur) var(--ease-soft) var(--reveal-delay, 0ms),
+              translate var(--reveal-dur) var(--ease-soft) var(--reveal-delay, 0ms);
+  will-change: transform;
+}
+
+.btn-primary .btn-arrow-up-right,
+.btn-primary .btn-arrow-down {
+  display: inline-block;
+  transition: transform var(--dur) var(--ease-soft);
+}
+
+@media (hover: hover) {
+  .btn-primary:hover {
+    transform: translateY(calc(-1 * var(--lift)));
+    box-shadow: 0 6px 20px -2px rgba(228, 87, 46, 0.35), 0 2px 6px -1px rgba(228, 87, 46, 0.2);
+  }
+  .btn-primary:hover .btn-arrow-up-right {
+    transform: translate(2px, -2px);
+  }
+  .btn-primary:hover .btn-arrow-down {
+    transform: translateY(3px);
+  }
+}
+
+.btn-primary:active {
+  transform: translateY(0px) scale(0.97);
+  transition-duration: 100ms;
+}
+
+/* 2. Secondary Buttons */
+.btn-secondary {
+  transition: transform var(--dur) var(--ease-soft),
+              border-color var(--dur) var(--ease-soft),
+              background-color var(--dur) var(--ease-soft),
+              color var(--dur) var(--ease-soft),
+              box-shadow var(--dur) var(--ease-soft),
+              opacity var(--reveal-dur) var(--ease-soft) var(--reveal-delay, 0ms),
+              translate var(--reveal-dur) var(--ease-soft) var(--reveal-delay, 0ms);
+  will-change: transform;
+}
+
+.btn-secondary .btn-arrow-up-right {
+  display: inline-block;
+  transition: transform var(--dur) var(--ease-soft);
+}
+
+@media (hover: hover) {
+  .btn-secondary:hover {
+    transform: translateY(-1px);
+    border-color: rgba(228, 87, 46, 0.40);
+    background-color: #FAF6F0;
+    box-shadow: 0 4px 12px -2px rgba(20, 17, 15, 0.05);
+  }
+  .btn-secondary:hover .btn-arrow-up-right {
+    transform: translate(2px, -2px);
+  }
+}
+
+.btn-secondary:active {
+  transform: translateY(0px) scale(0.97);
+  transition-duration: 100ms;
+}
+
+/* Generic interactive button support */
+.btn-interactive {
+  transition: transform var(--dur) var(--ease-soft),
+              filter var(--dur) var(--ease-soft),
+              background-color var(--dur) var(--ease-soft),
+              border-color var(--dur) var(--ease-soft),
+              color var(--dur) var(--ease-soft),
+              box-shadow var(--dur) var(--ease-soft),
+              opacity var(--reveal-dur) var(--ease-soft) var(--reveal-delay, 0ms),
+              translate var(--reveal-dur) var(--ease-soft) var(--reveal-delay, 0ms);
+  will-change: transform;
+}
+
+.btn-interactive .btn-arrow-right,
+.btn-interactive .btn-arrow-up-right,
+.btn-interactive .btn-arrow-down,
+.btn-interactive .btn-arrow-up {
+  display: inline-block;
+  transition: transform var(--dur) var(--ease-soft);
+}
+
+@media (hover: hover) {
+  .btn-interactive:hover {
+    transform: translateY(calc(-1 * var(--lift)));
+    filter: brightness(1.04);
+  }
+  .btn-interactive:hover .btn-arrow-right {
+    transform: translateX(2px);
+  }
+  .btn-interactive:hover .btn-arrow-up-right {
+    transform: translate(2px, -2px);
+  }
+  .btn-interactive:hover .btn-arrow-down {
+    transform: translateY(2px);
+  }
+  .btn-interactive:hover .btn-arrow-up {
+    transform: translateY(-2px);
+  }
+}
+
+.btn-interactive:active {
+  transform: translateY(0px) scale(0.97);
+  transition-duration: 100ms;
+}
+
+/* 3. Navigation Links Underline Animation */
+.nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.nav-link-text {
+  position: relative;
+  display: inline-block;
+}
+
+.nav-link-text::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background-color: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 250ms var(--ease-soft);
+}
+
+@media (hover: hover) {
+  .nav-link:hover .nav-link-text::after {
+    transform: scaleX(1);
+  }
+}
+
+/* 4. Direct Links & Footer Links */
+.direct-link {
+  transition: color var(--dur) var(--ease-soft);
+  cursor: pointer;
+}
+
+.direct-link-arrow {
+  display: inline-block;
+  transition: transform var(--dur) var(--ease-soft), color var(--dur) var(--ease-soft), opacity var(--dur) var(--ease-soft);
+}
+
+.back-to-top-btn {
+  cursor: pointer;
+}
+
+.back-to-top-circle {
+  transition: transform var(--dur) var(--ease-soft),
+              border-color var(--dur) var(--ease-soft),
+              color var(--dur) var(--ease-soft),
+              box-shadow var(--dur) var(--ease-soft);
+}
+
+@media (hover: hover) {
+  .direct-link:hover {
+    color: var(--foreground) !important;
+  }
+  .direct-link:hover .direct-link-arrow {
+    transform: translate(2px, -2px);
+    color: var(--foreground);
+    opacity: 1;
+  }
+  .back-to-top-btn:hover .back-to-top-circle {
+    transform: translateY(calc(-1 * var(--lift))) scale(1.06);
+    border-color: rgba(228, 87, 46, 0.4);
+    box-shadow: 0 4px 12px -2px rgba(20, 17, 15, 0.08);
+  }
+}
+
+/* 5. Copy Email Pop Animation */
+@keyframes pop-spring {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-pop-spring {
+  animation: pop-spring 300ms var(--ease-spring) forwards;
+}
+
+/* 6. Project Cards (Nestify, My Portfolio Website) */
+.project-card,
+.card-interactive {
+  transition: transform var(--dur) var(--ease-soft),
+              border-color var(--dur) var(--ease-soft),
+              box-shadow var(--dur) var(--ease-soft),
+              opacity var(--reveal-dur) var(--ease-soft) var(--reveal-delay, 0ms),
+              translate var(--reveal-dur) var(--ease-soft) var(--reveal-delay, 0ms);
+  will-change: transform;
+}
+
+@media (hover: hover) {
+  .project-card:hover,
+  .card-interactive:hover {
+    transform: translateY(-3px);
+    border-color: rgba(228, 87, 46, 0.25);
+    box-shadow: 0 14px 32px -4px rgba(20, 17, 15, 0.08), 0 6px 12px -2px rgba(20, 17, 15, 0.03);
+  }
+}
+
+/* 7. Coming Soon Card & Plus Icon */
+.coming-soon-card {
+  transition: transform var(--dur) var(--ease-soft),
+              border-color var(--dur) var(--ease-soft),
+              box-shadow var(--dur) var(--ease-soft),
+              opacity var(--reveal-dur) var(--ease-soft) var(--reveal-delay, 0ms),
+              translate var(--reveal-dur) var(--ease-soft) var(--reveal-delay, 0ms);
+}
+
+.coming-soon-plus {
+  transition: transform 300ms var(--ease-spring), color var(--dur) var(--ease-soft);
+}
+
+@media (hover: hover) {
+  .coming-soon-card:hover {
+    border-color: rgba(20, 17, 15, 0.28) !important;
+  }
+  .coming-soon-card:hover .coming-soon-plus {
+    transform: rotate(90deg);
+  }
+}
+
+/* 8. Tag Chips */
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--mint-soft);
+  border-color: var(--mint-line);
+  transition: transform var(--dur) var(--ease-soft),
+              border-color var(--dur) var(--ease-soft),
+              background-color var(--dur) var(--ease-soft),
+              box-shadow var(--dur) var(--ease-soft),
+              opacity var(--reveal-dur) var(--ease-soft) var(--reveal-delay, 0ms),
+              translate var(--reveal-dur) var(--ease-soft) var(--reveal-delay, 0ms);
+  will-change: transform;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .tag-chip:hover {
+    transform: translateY(-1px) rotate(-1deg);
+    border-color: rgba(127, 185, 160, 0.65);
+    box-shadow: 0 2px 6px -1px rgba(20, 17, 15, 0.06);
+  }
+}
+
+/* 9. Status Dots Pulse */
+@keyframes gentle-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.6;
+  }
+}
+
+.status-dot-pulse {
+  display: inline-block;
+  animation: gentle-pulse 2.4s ease-in-out infinite;
+}
+
+/* 10. Hero "Currently building" Pill */
+.hero-building-pill {
+  transition: transform var(--dur) var(--ease-soft),
+              border-color var(--dur) var(--ease-soft),
+              box-shadow var(--dur) var(--ease-soft),
+              opacity var(--reveal-dur) var(--ease-soft) var(--reveal-delay, 0ms),
+              translate var(--reveal-dur) var(--ease-soft) var(--reveal-delay, 0ms);
+  cursor: pointer;
+}
+
+.hero-building-pill .btn-arrow-up-right {
+  display: inline-block;
+  transition: transform var(--dur) var(--ease-soft);
+}
+
+@media (hover: hover) {
+  .hero-building-pill:hover {
+    transform: translateY(-1px);
+    border-color: rgba(228, 87, 46, 0.35);
+    box-shadow: 0 4px 12px -2px rgba(20, 17, 15, 0.05);
+  }
+  .hero-building-pill:hover .btn-arrow-up-right {
+    transform: translate(2px, -2px);
+  }
+}
+
+/* Text links: animated underline growing from left to right */
+.link-underline {
+  position: relative;
+  text-decoration: none;
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-size: 0% 1.5px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size var(--dur) var(--ease-soft),
+              color var(--dur) var(--ease-soft);
+}
+
+@media (hover: hover) {
+  .link-underline:hover {
+    background-size: 100% 1.5px;
+  }
+}
+
+/* --- SCROLL-IN REVEAL SYSTEM --- */
+
+/* Base hidden state when JS is active (prevents blank page if JS disabled) */
+html.js-reveal [data-reveal] {
+  opacity: 0;
+  translate: 0 var(--reveal-distance);
+  --reveal-delay: calc(min(var(--reveal-step, 0), 6) * var(--reveal-stagger));
+  transition: opacity var(--reveal-dur) var(--ease-soft) var(--reveal-delay),
+              translate var(--reveal-dur) var(--ease-soft) var(--reveal-delay);
+}
+
+/* Allow hero items or explicitly uncapped items to step higher than 6 */
+html.js-reveal [data-reveal][data-uncapped="true"] {
+  --reveal-delay: calc(var(--reveal-step, 0) * var(--reveal-stagger));
+}
+
+/* Revealed state */
+html.js-reveal [data-reveal].is-revealed {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* Temporary will-change applied strictly during the animation cycle */
+html.js-reveal [data-reveal].is-animating {
+  will-change: opacity, translate;
+}
+
+/* Instant reveal (for elements above viewport on load, restored scroll, or reduced motion) */
+html.js-reveal [data-reveal].is-instant,
+html.js-reveal [data-reveal].is-instant * {
+  opacity: 1 !important;
+  translate: 0 0 !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Section label tiny orange dash draw-in: scaleX 0 -> 1, origin left, 400ms */
+html.js-reveal .section-dash {
+  display: inline-block;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 400ms var(--ease-soft) var(--reveal-delay, 0ms);
+}
+
+html.js-reveal [data-reveal].is-revealed .section-dash,
+html.js-reveal .section-dash.is-revealed {
+  transform: scaleX(1);
+}
+
+html.js-reveal [data-reveal].is-instant .section-dash {
+  transform: scaleX(1) !important;
+  transition: none !important;
+}
+
+/* Hero illustration edge fade */
+.hero-illustration-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 12%, black 82%, transparent 100%),
+                      linear-gradient(to bottom, black 0%, black 78%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent 0%, black 12%, black 82%, transparent 100%),
+              linear-gradient(to bottom, black 0%, black 78%, transparent 100%);
+  mask-composite: intersect;
+}
+
+/* --- MASCOT MICRO-ANIMATIONS --- */
+
+/* 1. Hero Boy Breathing (slow vertical expand/contract, origin at feet) */
+@keyframes hero-boy-breathe {
+  0%, 100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-4px) scaleY(1.01);
+  }
+}
+
+.hero-boy-breathe {
+  transform-origin: 50% 100%;
+  animation: hero-boy-breathe 4.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* 2. Hero Clouds Drifting (translateX -16px to +16px, 3px vertical bob, scale 1.25) */
+@keyframes hero-cloud-drift-1 {
+  0% {
+    transform: translate(calc(-1 * var(--cloud-drift)), -1.5px) scale(var(--cloud-scale));
+  }
+  100% {
+    transform: translate(var(--cloud-drift), 1.5px) scale(var(--cloud-scale));
+  }
+}
+
+@keyframes hero-cloud-drift-2 {
+  0% {
+    transform: translate(var(--cloud-drift), 1.5px) scale(var(--cloud-scale));
+  }
+  100% {
+    transform: translate(calc(-1 * var(--cloud-drift)), -1.5px) scale(var(--cloud-scale));
+  }
+}
+
+@keyframes hero-cloud-drift-3 {
+  0% {
+    transform: translate(calc(-1 * var(--cloud-drift)), 1.5px) scale(var(--cloud-scale));
+  }
+  100% {
+    transform: translate(var(--cloud-drift), -1.5px) scale(var(--cloud-scale));
+  }
+}
+
+.hero-cloud-1 {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hero-cloud-drift-1 11s ease-in-out infinite alternate;
+  animation-delay: -2.5s;
+  will-change: transform;
+}
+
+.hero-cloud-2 {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hero-cloud-drift-2 14s ease-in-out infinite alternate;
+  animation-delay: -6.5s;
+  will-change: transform;
+}
+
+.hero-cloud-3 {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hero-cloud-drift-3 17s ease-in-out infinite alternate;
+  animation-delay: -11s;
+  will-change: transform;
+}
+
+/* 3. Footer Mascot Legs Swing (pivoting around hip line 51% 73.8%) */
+@keyframes footer-legs-swing {
+  0% {
+    transform: rotate(calc(-1 * var(--kick-deg)));
+  }
+  100% {
+    transform: rotate(var(--kick-deg));
+  }
+}
+
+.footer-mascot-legs {
+  transform-origin: 51% 73.8%;
+  animation: footer-legs-swing var(--kick-dur) ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* Sinking Footer Sun: translateY 0 to 28px as --story goes from 0.85 to 1.0 */
+.footer-sun {
+  transform: translateY(calc(clamp(0, (var(--story) - 0.85) / 0.15, 1) * 28px));
+  will-change: transform;
+}
+
+/* 4. Footer Floating "z z z" (beside top-right of head) */
+@keyframes footer-z-float {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.8);
+  }
+  15% {
+    opacity: 0.75;
+  }
+  75% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(10px, -30px) scale(1.15);
+  }
+}
+
+.footer-z-letter {
+  display: inline-block;
+  color: var(--accent);
+  opacity: 0;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  animation: footer-z-float var(--z-dur) ease-out infinite;
+  will-change: transform, opacity;
+}
+
+/* 5. Speech Bubble Pop-in & Fade */
+@keyframes bubble-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bubble-fade-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+.mascot-bubble {
+  animation: bubble-pop-in 220ms var(--ease-spring) forwards;
+}
+
+.mascot-bubble.is-leaving {
+  animation: bubble-fade-out 260ms var(--ease-soft) forwards;
+}
+
+/* Pause animations when off-screen */
+.mascot-paused .hero-boy-breathe,
+.mascot-paused .hero-cloud-1,
+.mascot-paused .hero-cloud-2,
+.mascot-paused .hero-cloud-3,
+.mascot-paused .footer-mascot-legs,
+.mascot-paused .footer-z-letter {
+  animation-play-state: paused !important;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html.js-reveal [data-reveal] {
+    opacity: 1 !important;
+    translate: 0 0 !important;
+    transition: none !important;
+  }
+
+  html.js-reveal .section-dash {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .hero-boy-breathe,
+  .footer-mascot-legs {
+    animation: none !important;
+    transform: none !important;
+    rotate: 0deg !important;
+  }
+
+  .hero-cloud-1,
+  .hero-cloud-2,
+  .hero-cloud-3 {
+    animation: none !important;
+    transform: scale(var(--cloud-scale)) !important;
+  }
+
+  .footer-z-letter {
+    animation: none !important;
+    display: none !important;
+    opacity: 0 !important;
+  }
+
+  .mascot-bubble {
+    animation: none !important;
+    transform: none !important;
+    transition: opacity 150ms ease !important;
+  }
+
+  .mascot-bubble.is-leaving {
+    animation: none !important;
+    transform: none !important;
+    opacity: 0 !important;
+    transition: opacity 150ms ease !important;
+  }
+
+  .btn-primary:hover,
+  .btn-primary:active,
+  .btn-primary:hover .btn-arrow-up-right,
+  .btn-primary:hover .btn-arrow-down {
+    transform: none !important;
+  }
+
+  .btn-secondary:hover,
+  .btn-secondary:active,
+  .btn-secondary:hover .btn-arrow-up-right {
+    transform: none !important;
+  }
+
+  .btn-interactive:hover,
+  .btn-interactive:active,
+  .btn-interactive .btn-arrow-right,
+  .btn-interactive .btn-arrow-up-right,
+  .btn-interactive .btn-arrow-down,
+  .btn-interactive .btn-arrow-up {
+    transform: none !important;
+  }
+
+  .project-card:hover,
+  .card-interactive:hover {
+    transform: none !important;
+  }
+
+  .coming-soon-card:hover .coming-soon-plus {
+    transform: none !important;
+  }
+
+  .tag-chip:hover {
+    transform: none !important;
+  }
+
+  .status-dot-pulse {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .hero-building-pill:hover,
+  .hero-building-pill:hover .btn-arrow-up-right {
+    transform: none !important;
+  }
+
+  .direct-link:hover .direct-link-arrow,
+  .back-to-top-btn:hover .back-to-top-circle {
+    transform: none !important;
+  }
+
+  .nav-link-text::after {
+    transition: none !important;
+  }
+
+  .animate-pop-spring {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .link-underline {
+    transition: color 150ms ease !important;
+  }
+
+  .mascot-hero-fade {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
